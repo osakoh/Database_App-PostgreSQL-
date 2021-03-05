@@ -1,8 +1,8 @@
-from database import ConnectionFromPool
+from database import CursorFromConnectionFromPool
 
 
 class User:
-    def __init__(self, email, first_name, last_name, id):
+    def __init__(self, id, first_name, last_name, email):
         self.email = email
         self.first_name = first_name
         self.last_name = last_name
@@ -15,11 +15,10 @@ class User:
         """
         saves a user to the database and returns a message on success
         """
-        with ConnectionFromPool() as connection:
-            with connection.cursor() as cursor:  # cursor: used to insert/retrieve data
-                cursor.execute("INSERT INTO public.users (first_name, last_name, email)"
-                               "VALUES (%s, %s, %s)",
-                               (self.first_name, self.last_name, self.email))
+        with CursorFromConnectionFromPool() as cursor:  # cursor: used to insert/retrieve data
+            cursor.execute("INSERT INTO public.users (first_name, last_name, email)"
+                           "VALUES (%s, %s, %s)",
+                           (self.first_name, self.last_name, self.email))
             # connection_pool.putconn(conn)  # return the connection back to the pool
         print("Data saved successfully")
 
@@ -29,12 +28,12 @@ class User:
         :param email: used to retrieve data from the database
         :return: the name of the user if it exist in the database, else an error message is shown
         """
-        with ConnectionFromPool() as connection:  # connect to the database and automatically close the connection
-            with connection.cursor() as cursor:  # cursor: used to insert/retrieve data
-                cursor.execute("SELECT * FROM public.users "
-                               "WHERE email=%s", (email,))
-                user_data = cursor.fetchone()  # get the first row
-                return cls(id=user_data[0], first_name=user_data[1], last_name=user_data[2], email=user_data[3])
+        # connect to the database and automatically close the connection cursor: used to insert/retrieve data
+        with CursorFromConnectionFromPool() as cursor:
+            cursor.execute("SELECT * FROM public.users "
+                           "WHERE email=%s", (email,))
+            user_data = cursor.fetchone()  # get the first row
+            return cls(id=user_data[0], first_name=user_data[1], last_name=user_data[2], email=user_data[3])
 
 
 """
