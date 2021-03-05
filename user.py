@@ -1,4 +1,4 @@
-from database import connect
+from database import connection_pool
 
 
 class User:
@@ -14,7 +14,7 @@ class User:
 
     def save_to_db(self):
         # connect to the database and automatically close the connection
-        with connect() as conn:
+        with connection_pool.getconn() as conn:
             # cursor: used to insert/retrieve data
             with conn.cursor() as cursor:
                 cursor.execute("INSERT INTO public.users (first_name, last_name, email)"
@@ -24,19 +24,22 @@ class User:
 
     @classmethod
     def load_from_db_with_email(cls, email):
-        with connect() as conn:  # connect to the database and automatically close the connection
-            with conn.cursor() as cursor:  # cursor: used to insert/retrieve data
-                try:
-                    cursor.execute("SELECT * FROM public.users "
-                                   "WHERE email=%s", (email,))
-                    user_data = cursor.fetchone()  # get the first row
-                    # print(user_data)
-                    # return (cls(id=user_data[0], first_name=user_data[1], last_name=user_data[2], email=user_data[3]))
-                    print(cls(id=user_data[0], first_name=user_data[1], last_name=user_data[2], email=user_data[3]))
-                except TypeError:
-                    return f"User with email '{email}' doesn't exist in the database"
-                except:
-                    return f"Please check the format of your input - '{email}'"
+        try:
+            with connection_pool.getconn() as conn:  # connect to the database and automatically close the connection
+                with conn.cursor() as cursor:  # cursor: used to insert/retrieve data
+                    try:
+                        cursor.execute("SELECT * FROM public.users "
+                                       "WHERE email=%s", (email,))
+                        user_data = cursor.fetchone()  # get the first row
+                        # print(user_data) return (cls(id=user_data[0], first_name=user_data[1], last_name=user_data[
+                        # 2], email=user_data[3]))
+                        print(cls(id=user_data[0], first_name=user_data[1], last_name=user_data[2], email=user_data[3]))
+                    except TypeError:
+                        print(f"User with email '{email}' doesn't exist in the database")
+                    except:
+                        print(f"Please check the format of your input - '{email}'")
+        except AttributeError:
+            print(f"Please check your connection settings.")
 
 
 """
