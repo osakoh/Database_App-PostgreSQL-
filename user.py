@@ -1,5 +1,6 @@
 from database import connect
 
+
 class User:
 
     def __init__(self, email, first_name, last_name, id):
@@ -23,16 +24,15 @@ class User:
 
     @classmethod
     def load_from_db_with_email(cls, email):
-        # connect to the database and automatically close the connection
-        with connect() as conn:
-            # cursor: used to insert/retrieve data
-            with conn.cursor() as cursor:
+        with connect() as conn:  # connect to the database and automatically close the connection
+            with conn.cursor() as cursor:  # cursor: used to insert/retrieve data
                 try:
                     cursor.execute("SELECT * FROM public.users "
                                    "WHERE email=%s", (email,))
-                    # get the first row
-                    user_data = cursor.fetchone()
-                    return cls(id=user_data[0], first_name=user_data[1], last_name=user_data[2], email=user_data[3])
+                    user_data = cursor.fetchone()  # get the first row
+                    # print(user_data)
+                    # return (cls(id=user_data[0], first_name=user_data[1], last_name=user_data[2], email=user_data[3]))
+                    print(cls(id=user_data[0], first_name=user_data[1], last_name=user_data[2], email=user_data[3]))
                 except TypeError:
                     return f"User with email '{email}' doesn't exist in the database"
                 except:
