@@ -1,6 +1,7 @@
 from user import User
 
-# User.load_from_db_with_email(email="mymail@mail.com")
-# user = User(id=None, first_name='Tina', last_name='Smith', email='Sam@s.com')
-# user.save_to_db()
-User.load_from_db_with_email("ann@a.com")
+user = User(id=None, first_name='Pao', last_name='Tim', email='p@t.com')
+user.save_to_db()
+# print(User.load_from_db_with_email("ann@a.com"))
+# print(User.load_from_db_with_email("tim@a.com"))
+# print(User.load_from_db_with_email("pru@s.com"))

@@ -1,8 +1,7 @@
-from database import connection_pool
+from database import ConnectionFromPool
 
 
 class User:
-
     def __init__(self, email, first_name, last_name, id):
         self.email = email
         self.first_name = first_name
@@ -13,33 +12,29 @@ class User:
         return f"User: {self.first_name} {self.last_name}"
 
     def save_to_db(self):
-        # connect to the database and automatically close the connection
-        with connection_pool.getconn() as conn:
-            # cursor: used to insert/retrieve data
-            with conn.cursor() as cursor:
+        """
+        saves a user to the database and returns a message on success
+        """
+        with ConnectionFromPool() as connection:
+            with connection.cursor() as cursor:  # cursor: used to insert/retrieve data
                 cursor.execute("INSERT INTO public.users (first_name, last_name, email)"
                                "VALUES (%s, %s, %s)",
                                (self.first_name, self.last_name, self.email))
+            # connection_pool.putconn(conn)  # return the connection back to the pool
         print("Data saved successfully")
 
     @classmethod
     def load_from_db_with_email(cls, email):
-        try:
-            with connection_pool.getconn() as conn:  # connect to the database and automatically close the connection
-                with conn.cursor() as cursor:  # cursor: used to insert/retrieve data
-                    try:
-                        cursor.execute("SELECT * FROM public.users "
-                                       "WHERE email=%s", (email,))
-                        user_data = cursor.fetchone()  # get the first row
-                        # print(user_data) return (cls(id=user_data[0], first_name=user_data[1], last_name=user_data[
-                        # 2], email=user_data[3]))
-                        print(cls(id=user_data[0], first_name=user_data[1], last_name=user_data[2], email=user_data[3]))
-                    except TypeError:
-                        print(f"User with email '{email}' doesn't exist in the database")
-                    except:
-                        print(f"Please check the format of your input - '{email}'")
-        except AttributeError:
-            print(f"Please check your connection settings.")
+        """
+        :param email: used to retrieve data from the database
+        :return: the name of the user if it exist in the database, else an error message is shown
+        """
+        with ConnectionFromPool() as connection:  # connect to the database and automatically close the connection
+            with connection.cursor() as cursor:  # cursor: used to insert/retrieve data
+                cursor.execute("SELECT * FROM public.users "
+                               "WHERE email=%s", (email,))
+                user_data = cursor.fetchone()  # get the first row
+                return cls(id=user_data[0], first_name=user_data[1], last_name=user_data[2], email=user_data[3])
 
 
 """
